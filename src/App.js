@@ -24,6 +24,7 @@ class App extends React.Component {
                 vehicle3: "",
                 vehicle4: "",
             },
+            timeTaken: 0,
             errorMessage: ""
         };
 
@@ -66,31 +67,47 @@ class App extends React.Component {
             }
         }));
         console.log(this.state);
-    }
+    };
 
-    handleVehicleChange = async (event) => {
+    handleVehicleChange = (event) => {
         const { name, value } = event.target;
         const newVehicles = JSON.parse(JSON.stringify(this.state.vehiclesOriginal));
-        await this.setState(prev => ({
+        this.setState(prev => ({
             selectedVehicles: {
                 ...prev.selectedVehicles,
                 [name]: value
-            }}));
-        
-        newVehicles.map(v => {
-            for (let objVal of Object.values(this.state.selectedVehicles)) {
-                if (objVal === v.name) {
-                    v.total_no -= 1;
-                }
-            }
-        });
+            }}), () => {
 
-        this.setState(prev => ({
-                ...prev,
-                errorMessage: '',
-                vehicles: newVehicles
-            }));
+                newVehicles.map(v => {
+                    for (let objVal of Object.values(this.state.selectedVehicles)) {
+                        if (objVal === v.name) {
+                            v.total_no -= 1;
+                        }
+                    }
+                });
+        
+                this.setState(prev => ({
+                        ...prev,
+                        errorMessage: '',
+                        vehicles: newVehicles
+                    }));
+            });
     };
+
+    // calculateTimeTaken = () => {
+
+    // }
+
+    onSubmit = () => {
+        console.log(this.state);
+        console.log(Object.values(this.state.selectedDestinations));
+        console.log(Object.values(this.state.selectedVehicles));
+
+        Object.values(this.state.selectedDestinations).indexOf('') !== -1 ||
+        Object.values(this.state.selectedVehicles).indexOf('') !== -1 ?
+        this.setState({errorMessage: 'Please enter all the values!'}) :
+        console.log('submitted');
+    }
 
     render() {
 
@@ -115,6 +132,7 @@ class App extends React.Component {
                 <Vehicle
                     vehicles={vehicles}
                     value={vehicle1}
+                    distance={destination1.distance}
                     label="vehicle1"
                     handleVehicleChange={this.handleVehicleChange}
                 /> : null}
@@ -130,6 +148,7 @@ class App extends React.Component {
                 <Vehicle
                     vehicles={vehicles}
                     value={vehicle2}
+                    distance={destination2.distance}
                     label="vehicle2"
                     handleVehicleChange={this.handleVehicleChange}
                 /> : null}
@@ -145,6 +164,7 @@ class App extends React.Component {
                 <Vehicle
                     vehicles={vehicles}
                     value={vehicle3}
+                    distance={destination3.distance}
                     label="vehicle3"
                     handleVehicleChange={this.handleVehicleChange}
                 /> : null}
@@ -160,6 +180,7 @@ class App extends React.Component {
                 <Vehicle
                     vehicles={vehicles}
                     value={vehicle4}
+                    distance={destination4.distance}
                     label="vehicle4"
                     handleVehicleChange={this.handleVehicleChange}
                 /> : null}
@@ -169,7 +190,7 @@ class App extends React.Component {
                     <Grid style={{display: 'flex', justifyContent: 'center', fontSize: 16, color: 'red'}} item xs={12}>{errorMessage}</Grid> : null
                 }
                 <Grid item xs={12} style={{display: 'flex', justifyContent: 'center'}}>
-                <Button variant="contained" color="primary">
+                <Button onClick={this.onSubmit} variant="contained" color="primary">
                     Find Falcone
                 </Button>
                 </Grid>

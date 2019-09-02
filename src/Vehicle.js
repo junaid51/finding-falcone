@@ -1,7 +1,7 @@
 import React from 'react';
 import { FormControl, FormLabel, Radio, RadioGroup, FormControlLabel } from '@material-ui/core';
 
-const Vehicle = ({ vehicles, value, label, handleVehicleChange }) => {
+const Vehicle = ({ vehicles, value, distance, label, handleVehicleChange }) => {
     return (
         <form autoComplete="off">
         <FormControl component="fieldset">
@@ -12,14 +12,14 @@ const Vehicle = ({ vehicles, value, label, handleVehicleChange }) => {
             onChange={handleVehicleChange}
             >
             {
-                vehicles.map((data, i) => {
+                vehicles.map((vehicle, i) => {
                     return (
                         <FormControlLabel
                             key={i}
-                            value={data.name}
+                            value={vehicle.name}
                             control={<Radio />}
-                            label={`${data.name} (${data.total_no})`}
-                            disabled={data.total_no === 0 ? true : false}
+                            label={`${vehicle.name} (${vehicle.total_no})`}
+                            disabled={vehicle.total_no === 0 || vehicle.max_distance < distance ? true : false}
                         />
                     )
                 })
