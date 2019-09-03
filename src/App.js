@@ -3,6 +3,7 @@ import falcone from './api/falcone';
 import { Button, Grid } from '@material-ui/core';
 import Destination from './Destination';
 import Vehicle from './Vehicle';
+import { async } from 'q';
 
 class App extends React.Component {
 
@@ -22,13 +23,20 @@ class App extends React.Component {
                 vehicle1: "",
                 vehicle2: "",
                 vehicle3: "",
-                vehicle4: "",
+                vehicle4: ""
+            },
+            planetVehicles: {
+                first: "",
+                second: "",
+                third: "",
+                fourth: ""
             },
             timeTaken: 0,
             errorMessage: ""
         };
 
         this.getFalconeData();
+        this.postFalconeData();
     };
 
     getFalconeData = async() => {
@@ -46,6 +54,19 @@ class App extends React.Component {
             console.log(err);
         }
     };
+
+    postFalconeData = async() => {
+        try {
+            const response = await falcone.post('token', {
+                headers: {
+                    'Accept' : 'application/json'
+                }
+            });
+            console.log(response.data);
+        } catch(err) {
+            console.log(err);
+        }
+    }
 
     handlePlanetChange = (event) => {
         const { name, value } = event.target;
@@ -71,13 +92,35 @@ class App extends React.Component {
 
     handleVehicleChange = (event) => {
         const { name, value } = event.target;
+        const number = name[name.length - 1];
+        let planet = 'first';
+        switch(number) {
+            case "2" : planet = 'second';
+            break;
+            case "3" : planet = 'third';
+            break;
+            case "4" : planet = 'fourth';
+            break;
+            default:  planet = 'first';
+        }
+        console.log(planet);
         const newVehicles = JSON.parse(JSON.stringify(this.state.vehiclesOriginal));
         this.setState(prev => ({
+            planetVehicles : {
+                ...prev.planetVehicles,
+                [planet]: {
+                    name: this.state.selectedDestinations[`destination${number}`].name,
+                    distance: this.state.selectedDestinations[`destination${number}`].distance,
+                    vehicle: value,
+                    speed: this.state.vehiclesOriginal.find(f => f.name === value).speed
+                }
+
+            },
             selectedVehicles: {
                 ...prev.selectedVehicles,
                 [name]: value
-            }}), () => {
-
+            }
+        }), () => {
                 newVehicles.map(v => {
                     for (let objVal of Object.values(this.state.selectedVehicles)) {
                         if (objVal === v.name) {
@@ -85,13 +128,23 @@ class App extends React.Component {
                         }
                     }
                 });
+
+                let timeTaken = 0;
+
+                for (let objVal of Object.values(this.state.planetVehicles)) {
+                    if(objVal) {
+                        timeTaken += objVal.distance / objVal.speed;
+                    }
+                }
         
-                this.setState(prev => ({
-                        ...prev,
-                        errorMessage: '',
-                        vehicles: newVehicles
-                    }));
+                this.setState({
+                    errorMessage: '',
+                    vehicles: newVehicles,
+                    timeTaken
+                    });
             });
+
+            console.log(this.state)
     };
 
     // calculateTimeTaken = () => {
@@ -99,9 +152,11 @@ class App extends React.Component {
     // }
 
     onSubmit = () => {
-        console.log(this.state);
-        console.log(Object.values(this.state.selectedDestinations));
-        console.log(Object.values(this.state.selectedVehicles));
+
+        const data = {};
+        data['planet_names'] = Object.values(this.state.selectedDestinations);
+        data['vehicle_names'] = Object.values(this.state.selectedVehicles);
+        console.log(data);
 
         Object.values(this.state.selectedDestinations).indexOf('') !== -1 ||
         Object.values(this.state.selectedVehicles).indexOf('') !== -1 ?
@@ -189,6 +244,9 @@ class App extends React.Component {
                     errorMessage ?
                     <Grid style={{display: 'flex', justifyContent: 'center', fontSize: 16, color: 'red'}} item xs={12}>{errorMessage}</Grid> : null
                 }
+                 <Grid item xs={12} style={{display: 'flex', justifyContent: 'center'}}>
+                     Time Taken: {this.state.timeTaken}
+                 </Grid>
                 <Grid item xs={12} style={{display: 'flex', justifyContent: 'center'}}>
                 <Button onClick={this.onSubmit} variant="contained" color="primary">
                     Find Falcone
