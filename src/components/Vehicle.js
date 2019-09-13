@@ -1,11 +1,11 @@
 import React from 'react';
-import { FormControl, FormLabel, Radio, RadioGroup, FormControlLabel } from '@material-ui/core';
+import { Grid } from '@material-ui/core';
+import { FormControl, Radio, RadioGroup, FormControlLabel } from '@material-ui/core';
 
 const Vehicle = ({ vehicles, value, distance, label, handleVehicleChange }) => {
     return (
-        <form autoComplete="off">
+        <Grid style={{padding: 6}}>
         <FormControl component="fieldset">
-            <FormLabel component="legend">Vehicles</FormLabel>
             <RadioGroup
             name={label}
             value={value}
@@ -26,7 +26,7 @@ const Vehicle = ({ vehicles, value, distance, label, handleVehicleChange }) => {
             }
             </RadioGroup>
         </FormControl>
-        </form>
+        </Grid>
     );
 };
 
